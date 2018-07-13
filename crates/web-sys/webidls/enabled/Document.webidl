@@ -14,11 +14,13 @@
  * https://drafts.csswg.org/cssom-view/#extensions-to-the-document-interface
  */
 
+/* Depends on #246
 interface WindowProxy;
 interface nsISupports;
 interface URI;
 interface nsIDocShell;
 interface nsILoadGroup;
+*/
 
 enum VisibilityState { "hidden", "visible" };
 
@@ -33,8 +35,10 @@ dictionary ElementCreationOptions {
 /* https://dom.spec.whatwg.org/#interface-document */
 [Constructor]
 interface Document : Node {
+/*TODO
   [Throws]
   readonly attribute DOMImplementation implementation;
+*/
   [Pure, Throws, BinaryName="documentURIFromJS", NeedsCallerType]
   readonly attribute DOMString URL;
   [Pure, Throws, BinaryName="documentURIFromJS", NeedsCallerType]
@@ -54,17 +58,21 @@ interface Document : Node {
   readonly attribute DocumentType? doctype;
   [Pure]
   readonly attribute Element? documentElement;
+/*TODO
   [Pure]
   HTMLCollection getElementsByTagName(DOMString localName);
   [Pure, Throws]
   HTMLCollection getElementsByTagNameNS(DOMString? namespace, DOMString localName);
   [Pure]
   HTMLCollection getElementsByClassName(DOMString classNames);
+*/
   [Pure]
   Element? getElementById(DOMString elementId);
 
   [CEReactions, NewObject, Throws]
-  Element createElement(DOMString localName, optional (ElementCreationOptions or DOMString) options);
+  //Dictionaries aren't supported yet #241
+  //Element createElement(DOMString localName, optional (ElementCreationOptions or DOMString) options);
+  Element createElement(DOMString localName, optional DOMString options);
   [CEReactions, NewObject, Throws]
   Element createElementNS(DOMString? namespace, DOMString qualifiedName, optional (ElementCreationOptions or DOMString) options);
   [NewObject]
@@ -73,8 +81,10 @@ interface Document : Node {
   Text createTextNode(DOMString data);
   [NewObject]
   Comment createComment(DOMString data);
+/*TODO
   [NewObject, Throws]
   ProcessingInstruction createProcessingInstruction(DOMString target, DOMString data);
+*/
 
   [CEReactions, Throws]
   Node importNode(Node node, optional boolean deep = false);
@@ -84,8 +94,10 @@ interface Document : Node {
   [NewObject, Throws, NeedsCallerType]
   Event createEvent(DOMString interface);
 
+/*TODO
   [NewObject, Throws]
   Range createRange();
+*/
 
   // NodeFilter.SHOW_ALL = 0xFFFFFFFF
   [NewObject, Throws]
@@ -100,12 +112,14 @@ interface Document : Node {
 
   // These are not in the spec, but leave them for now for backwards compat.
   // So sort of like Gecko extensions
+/*TODO
   [NewObject, Throws]
   CDATASection createCDATASection(DOMString data);
   [NewObject, Throws]
   Attr createAttribute(DOMString name);
   [NewObject, Throws]
   Attr createAttributeNS(DOMString? namespace, DOMString name);
+*/
 };
 
 // https://html.spec.whatwg.org/multipage/dom.html#the-document-object
@@ -127,12 +141,14 @@ partial interface Document {
            attribute HTMLElement? body;
   [Pure]
   readonly attribute HTMLHeadElement? head;
+/*TODO
   [SameObject] readonly attribute HTMLCollection images;
   [SameObject] readonly attribute HTMLCollection embeds;
   [SameObject] readonly attribute HTMLCollection plugins;
   [SameObject] readonly attribute HTMLCollection links;
   [SameObject] readonly attribute HTMLCollection forms;
   [SameObject] readonly attribute HTMLCollection scripts;
+*/
   [Pure]
   NodeList getElementsByName(DOMString elementName);
   //(Not implemented)readonly attribute DOMElementMap cssElementMap;
@@ -241,8 +257,10 @@ partial interface Document {
   //(HTML only)[CEReactions] attribute [TreatNullAs=EmptyString] DOMString alinkColor;
   //(HTML only)[CEReactions] attribute [TreatNullAs=EmptyString] DOMString bgColor;
 
+/*
   [SameObject] readonly attribute HTMLCollection anchors;
   [SameObject] readonly attribute HTMLCollection applets;
+*/
 
   //(HTML only)void clear();
   //(HTML only)void captureEvents();

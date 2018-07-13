@@ -26,7 +26,21 @@ pub enum TypePosition {
 pub fn webidl_ty_to_syn_ty(ty: &webidl::ast::Type, pos: TypePosition) -> Option<syn::Type> {
     // nullable types are not yet supported (see issue #14)
     if ty.nullable {
-        return None;
+        return Some(match ty.kind {
+            // `DOMString -> `&str` for arguments
+            webidl::ast::TypeKind::DOMString if pos == TypePosition::Argument => {
+                option_ty(shared_ref(ident_ty(raw_ident("str"))))
+            }
+            webidl::ast::TypeKind::DOMString => {
+                option_ty(simple_path_ty(vec![rust_ident("wasm_bindgen"), rust_ident("JsValue")]))
+            },
+
+            // Support for these types is not yet implemented, so skip
+            // generating any bindings for this function.
+            _=> {
+                return None;
+            }
+        });
     }
     Some(match ty.kind {
         // `any` becomes `::wasm_bindgen::JsValue`.
@@ -59,8 +73,9 @@ pub fn webidl_ty_to_syn_ty(ty: &webidl::ast::Type, pos: TypePosition) -> Option<
         webidl::ast::TypeKind::DOMString if pos == TypePosition::Argument => {
             shared_ref(ident_ty(raw_ident("str")))
         }
-        // `DOMString` is not supported yet in other positions.
-        webidl::ast::TypeKind::DOMString => return None,
+        webidl::ast::TypeKind::DOMString => {
+            simple_path_ty(vec![rust_ident("wasm_bindgen"), rust_ident("JsValue")])
+        },
 
         // Support for these types is not yet implemented, so skip
         // generating any bindings for this function.
@@ -167,6 +182,23 @@ fn result_ty(t: syn::Type) -> syn::Type {
     });
 
     let ident = raw_ident("Result");
+    let seg = syn::PathSegment { ident, arguments };
+    let path: syn::Path = seg.into();
+    let ty = syn::TypePath { qself: None, path };
+    ty.into()
+}
+
+fn option_ty(t: syn::Type) -> syn::Type {
+    let arguments = syn::PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
+        colon2_token: None,
+        lt_token: Default::default(),
+        args: FromIterator::from_iter(vec![
+            syn::GenericArgument::Type(t),
+        ]),
+        gt_token: Default::default(),
+    });
+
+    let ident = raw_ident("Option");
     let seg = syn::PathSegment { ident, arguments };
     let path: syn::Path = seg.into();
     let ty = syn::TypePath { qself: None, path };
